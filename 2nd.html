@@ -1,0 +1,853 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StayEase - Hotel Booking</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#24334a}
+header{background:#142b49;color:white;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:26px;font-weight:bold;color:white}
+.logo span{color:#f5bb49}
+nav a{color:white;text-decoration:none;margin:0 8px;font-size:14px}
+.hero{padding:65px 6%;color:white;background:linear-gradient(120deg,#142b49eF,#2864dcbb),url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80') center/cover}
+.hero h1{font-size:clamp(32px,5vw,52px);margin:0 0 12px}
+.hero p{font-size:18px}
+.search,.panel,.room,.booking{background:white;border-radius:12px;padding:20px;margin:15px 0;box-shadow:0 3px 14px #0000000d}
+.search{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;color:#24334a}
+main{max-width:1200px;margin:auto;padding:25px}
+h2{color:#142b49}
+label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd5e2;border-radius:6px;font:inherit}
+button{background:#2864dc;color:white;border:0;padding:11px 16px;border-radius:7px;cursor:pointer;font-weight:bold;margin:5px 3px 5px 0}
+button:hover{opacity:.88}
+.danger{background:#c73737}
+.secondary{background:#e7edf7;color:#142b49}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.room{padding:0;overflow:hidden}
+.room img{width:100%;height:180px;object-fit:cover}
+.room-content{padding:18px}
+.price{font-size:22px;color:#2864dc;font-weight:bold}
+.tag{display:inline-block;background:#e8efff;color:#214a91;padding:5px 9px;border-radius:20px;font-size:12px;margin:3px}
+section{scroll-margin-top:20px;margin-bottom:35px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.hidden{display:none!important}
+.notice{padding:12px;background:#e8f5ee;border-radius:7px;margin:10px 0}
+footer{background:#142b49;color:white;text-align:center;padding:25px}
+small{color:#68778c}
+table{width:100%;border-collapse:collapse;min-width:550px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #ddd}
+th{background:#e8efff}
+.table-wrap{overflow-x:auto}
+@media(max-width:600px){header{padding:15px}nav a{display:inline-block;margin:5px}main{padding:15px}.hero{padding:45px 20px}}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">Stay<span>Ease</span> 🏨</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#rooms">Rooms</a>
+    <a href="#account">Account</a>
+    <a href="#bookings">Bookings</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#admin">Admin</a>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <h1>Find Your Perfect Stay</h1>
+  <p>Search rooms, compare prices and book your next trip easily.</p>
+
+  <form class="search" id="searchForm">
+    <div>
+      <label>Destination</label>
+      <input id="destination" placeholder="Enter city" value="Chennai" required>
+    </div>
+    <div>
+      <label>Check-in</label>
+      <input type="date" id="checkin" required>
+    </div>
+    <div>
+      <label>Check-out</label>
+      <input type="date" id="checkout" required>
+    </div>
+    <div>
+      <label>Guests</label>
+      <select id="guests">
+        <option>1</option><option selected>2</option>
+        <option>3</option><option>4</option>
+        <option>5</option><option>6</option>
+      </select>
+    </div>
+    <div><label>&nbsp;</label><button type="submit">Search Rooms</button></div>
+  </form>
+</section>
+
+<main>
+<section id="rooms">
+  <h2>Available Hotel Rooms</h2>
+  <p id="searchInfo">Choose a room for your stay.</p>
+  <div class="grid" id="roomList"></div>
+</section>
+
+<section id="account">
+  <h2>Customer Account</h2>
+  <div class="two">
+    <div class="panel" id="authPanel">
+      <h3>Register / Login</h3>
+      <form id="registerForm">
+        <h4>Create an account</h4>
+        <label>Full name</label>
+        <input id="regName" required>
+        <label>Email</label>
+        <input type="email" id="regEmail" required>
+        <label>Phone</label>
+        <input type="tel" id="regPhone" required>
+        <label>Password</label>
+        <input type="password" id="regPassword" minlength="4" required>
+        <button type="submit">Register</button>
+      </form>
+
+      <hr>
+      <form id="loginForm">
+        <h4>Already registered? Login</h4>
+        <label>Email</label>
+        <input type="email" id="loginEmail" required>
+        <label>Password</label>
+        <input type="password" id="loginPassword" required>
+        <button type="submit">Login</button>
+      </form>
+      <p id="authMessage"></p>
+    </div>
+
+    <div class="panel">
+      <h3>My Profile</h3>
+      <p id="profileInfo">Please log in to view your profile.</p>
+      <form id="profileForm" class="hidden">
+        <label>Full name</label>
+        <input id="profileName" required>
+        <label>Phone</label>
+        <input id="profilePhone" required>
+        <button type="submit">Update Profile</button>
+        <button type="button" class="danger" id="logoutBtn">Logout</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="bookings">
+  <h2>My Booking History</h2>
+  <p>Modify or cancel confirmed bookings at least 3 days before check-in.</p>
+  <div id="bookingList"></div>
+</section>
+
+<section id="about">
+  <h2>About StayEase</h2>
+  <div class="two">
+    <div class="panel">
+      <h3>Our Aim</h3>
+      <p>To provide a simple online platform where customers can search hotels, view room information, compare prices and reserve rooms.</p>
+    </div>
+    <div class="panel">
+      <h3>Our Features</h3>
+      <ul>
+        <li>Room search and availability</li>
+        <li>Customer registration and login</li>
+        <li>Online booking simulation</li>
+        <li>Booking history and cancellation</li>
+        <li>Administrator room management</li>
+        <li>Responsive website design</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="help">
+  <h2>FAQs and Travel Guide</h2>
+  <div class="panel">
+    <details>
+      <summary>How can I book a room?</summary>
+      <p>Search your dates, select an available room and log in to confirm your booking.</p>
+    </details>
+    <details>
+      <summary>Can I cancel my booking?</summary>
+      <p>Yes. This demo allows customer cancellation at least 3 days before check-in.</p>
+    </details>
+    <details>
+      <summary>Is real payment collected?</summary>
+      <p>No. This is a student project demonstration and does not process payments.</p>
+    </details>
+    <details>
+      <summary>What should I know before travelling?</summary>
+      <p>Confirm hotel check-in times, carry valid identification and check local transport options.</p>
+    </details>
+  </div>
+</section>
+
+<section id="reviews">
+  <h2>Guest Reviews</h2>
+  <div class="two">
+    <div class="panel">
+      <form id="reviewForm">
+        <label>Rating</label>
+        <select id="rating">
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Very good</option>
+          <option value="3">3 - Good</option>
+          <option value="2">2 - Fair</option>
+          <option value="1">1 - Poor</option>
+        </select>
+        <label>Your review</label>
+        <textarea id="reviewText" required></textarea>
+        <button type="submit">Submit Review</button>
+      </form>
+    </div>
+    <div class="panel" id="reviewList">
+      <p>No reviews yet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact Us</h2>
+  <div class="two">
+    <div class="panel">
+      <h3>Customer Support</h3>
+      <p>Email: support@stayease.example</p>
+      <p>Phone: +91 98765 43210</p>
+      <p>Address: Chennai, Tamil Nadu, India</p>
+    </div>
+    <div class="panel">
+      <form id="contactForm">
+        <label>Your name</label>
+        <input required>
+        <label>Email</label>
+        <input type="email" required>
+        <label>Message</label>
+        <textarea required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+      <p id="contactMessage"></p>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <h2>Privacy Policy</h2>
+  <div class="panel">
+    <p>This educational demo saves customer and booking data in the browser. Do not enter real passwords or sensitive information. A production website requires secure server-side authentication, protected storage and an appropriate privacy policy.</p>
+  </div>
+</section>
+
+<section id="admin">
+  <h2>Administrator Dashboard</h2>
+  <div class="two">
+    <div class="panel">
+      <h3>Admin Login</h3>
+      <p><small>Demo email: admin@stayease.local</small></p>
+      <p><small>Demo password: admin123</small></p>
+      <form id="adminLoginForm">
+        <label>Email</label>
+        <input type="email" id="adminEmail" required>
+        <label>Password</label>
+        <input type="password" id="adminPassword" required>
+        <button type="submit">Admin Login</button>
+        <button type="button" id="adminLogout" class="danger hidden">Logout</button>
+      </form>
+      <p id="adminMessage"></p>
+    </div>
+    <div class="panel">
+      <h3>Admin Responsibilities</h3>
+      <ul>
+        <li>Update room prices and quantities</li>
+        <li>View and cancel bookings</li>
+        <li>Monitor registered customers</li>
+        <li>Review customer feedback</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="adminTools">
+    <h3>Manage Room Types</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Room</th><th>Price per night (₹)</th><th>Quantity</th><th>Action</th></tr>
+        </thead>
+        <tbody id="adminRoomList"></tbody>
+      </table>
+    </div>
+    <h3>All Reservations</h3>
+    <div id="adminBookingList"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <h3>StayEase Hotel Booking</h3>
+  <p>Find your comfort. Enjoy your journey.</p>
+  <p>© 2026 StayEase | Internet Programming Lab Project</p>
+</footer>
+
+<script>
+"use strict";
+
+const KEY = "stayEaseSingleFile";
+const originalRooms = [
+  {
+    id:"standard", name:"Standard Room", price:2500, quantity:10, capacity:2,
+    description:"A comfortable room for solo travellers and couples.",
+    amenities:["Wi-Fi","Air conditioning","Queen bed"],
+    image:"https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    id:"deluxe", name:"Deluxe Room", price:4200, quantity:8, capacity:3,
+    description:"A spacious room with additional comfort and amenities.",
+    amenities:["Wi-Fi","Breakfast","City view"],
+    image:"https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    id:"suite", name:"Executive Suite", price:7500, quantity:4, capacity:4,
+    description:"A premium suite with a separate lounge area.",
+    amenities:["Lounge","Mini bar","Premium toiletries"],
+    image:"https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    id:"family", name:"Family Room", price:6000, quantity:6, capacity:6,
+    description:"A large room designed for families and groups.",
+    amenities:["Two beds","Wi-Fi","Family seating"],
+    image:"https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80"
+  }
+];
+
+function loadData(){
+  try{
+    const saved=localStorage.getItem(KEY);
+    if(saved){
+      const data=JSON.parse(saved);
+      if(data.users && data.rooms && data.bookings && data.reviews) return data;
+    }
+  }catch(error){}
+  return {
+    users:[],
+    rooms:JSON.parse(JSON.stringify(originalRooms)),
+    bookings:[],
+    reviews:[]
+  };
+}
+
+let db=loadData();
+let currentUser=null;
+let adminOn=false;
+let searchState={destination:"Chennai",checkin:"",checkout:"",guests:2};
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+}
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,char=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+}
+
+function money(value){
+  return "₹"+Number(value).toLocaleString("en-IN");
+}
+
+function roomById(id){
+  return db.rooms.find(room=>room.id===id);
+}
+
+function dateString(date){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,"0");
+  const d=String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+function nightsBetween(start,end){
+  const a=new Date(start+"T00:00:00");
+  const b=new Date(end+"T00:00:00");
+  return Math.round((b-a)/86400000);
+}
+
+function availableFor(roomId,checkin,checkout,excludeId=null){
+  const room=roomById(roomId);
+  if(!room || nightsBetween(checkin,checkout)<=0) return 0;
+
+  const overlapping=db.bookings.filter(booking=>
+    booking.roomId===roomId &&
+    booking.status==="Confirmed" &&
+    booking.id!==excludeId &&
+    booking.checkin<checkout &&
+    booking.checkout>checkin
+  ).length;
+
+  return Math.max(0,room.quantity-overlapping);
+}
+
+function canChange(booking){
+  const today=dateString(new Date());
+  return booking.status==="Confirmed" &&
+    nightsBetween(today,booking.checkin)>=3;
+}
+
+function initializeDates(){
+  const today=new Date();
+  const tomorrow=new Date();
+  tomorrow.setDate(today.getDate()+1);
+  const after=new Date();
+  after.setDate(today.getDate()+2);
+
+  document.getElementById("checkin").min=dateString(today);
+  document.getElementById("checkin").value=dateString(tomorrow);
+  document.getElementById("checkout").min=dateString(tomorrow);
+  document.getElementById("checkout").value=dateString(after);
+
+  searchState.checkin=dateString(tomorrow);
+  searchState.checkout=dateString(after);
+}
+
+function renderRooms(){
+  const destination=document.getElementById("destination").value.trim();
+  const checkin=document.getElementById("checkin").value;
+  const checkout=document.getElementById("checkout").value;
+  const guests=Number(document.getElementById("guests").value);
+  const validDates=nightsBetween(checkin,checkout)>0;
+
+  searchState={destination,checkin,checkout,guests};
+
+  document.getElementById("searchInfo").textContent=
+    `Destination: ${destination || "Any destination"} | ${checkin} to ${checkout} | ${guests} guest(s)`;
+
+  const availableRooms=db.rooms.filter(room=>
+    room.capacity>=guests &&
+    (!validDates || availableFor(room.id,checkin,checkout)>0)
+  );
+
+  document.getElementById("roomList").innerHTML=availableRooms.length?
+    availableRooms.map(room=>`
+      <article class="room">
+        <img src="${room.image}" alt="${escapeHTML(room.name)}">
+        <div class="room-content">
+          <h3>${escapeHTML(room.name)}</h3>
+          <p>${escapeHTML(room.description)}</p>
+          <div>${room.amenities.map(a=>`<span class="tag">${escapeHTML(a)}</span>`).join("")}</div>
+          <p class="price">${money(room.price)} <small>/ night</small></p>
+          <p>Capacity: ${room.capacity} guest(s)</p>
+          <p>Available rooms: ${validDates?availableFor(room.id,checkin,checkout):room.quantity}</p>
+          <button data-book="${room.id}">Book Now</button>
+        </div>
+      </article>
+    `).join("") :
+    '<div class="panel">No rooms match your search. Try different dates or fewer guests.</div>';
+}
+
+document.getElementById("searchForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(nightsBetween(checkin.value,checkout.value)<=0){
+    alert("Check-out must be after check-in.");
+    return;
+  }
+  renderRooms();
+  document.getElementById("rooms").scrollIntoView();
+});
+
+document.getElementById("checkin").addEventListener("change",()=>{
+  const ci=document.getElementById("checkin").value;
+  const co=document.getElementById("checkout");
+  co.min=ci;
+  if(co.value<=ci){
+    const next=new Date(ci+"T00:00:00");
+    next.setDate(next.getDate()+1);
+    co.value=dateString(next);
+  }
+  renderRooms();
+});
+
+["checkout","guests","destination"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",renderRooms);
+});
+
+document.getElementById("roomList").addEventListener("click",event=>{
+  const button=event.target.closest("[data-book]");
+  if(button) bookRoom(button.dataset.book);
+});
+
+function bookRoom(roomId,existing=null){
+  if(!currentUser){
+    alert("Please register or log in before booking.");
+    document.getElementById("account").scrollIntoView();
+    return;
+  }
+
+  const room=roomById(roomId);
+  if(!room) return;
+
+  const old=existing?db.bookings.find(b=>b.id===existing):null;
+  if(old && !canChange(old)){
+    alert("Bookings can only be modified at least 3 days before check-in.");
+    return;
+  }
+
+  const defaultIn=old?old.checkin:searchState.checkin;
+  const defaultOut=old?old.checkout:searchState.checkout;
+  const destination=old?old.destination:searchState.destination;
+  const defaultGuests=old?old.guests:Math.min(searchState.guests,room.capacity);
+
+  const checkin=prompt("Check-in date (YYYY-MM-DD):",defaultIn);
+  if(checkin===null) return;
+
+  const checkout=prompt("Check-out date (YYYY-MM-DD):",defaultOut);
+  if(checkout===null) return;
+
+  const guestsText=prompt("Number of guests (maximum "+room.capacity+"):",defaultGuests);
+  if(guestsText===null) return;
+
+  const guests=Number(guestsText);
+  const place=prompt("Destination:",destination||"Chennai");
+  if(place===null) return;
+
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(checkin) ||
+     !/^\d{4}-\d{2}-\d{2}$/.test(checkout) ||
+     nightsBetween(checkin,checkout)<=0 ||
+     checkin<dateString(new Date())){
+    alert("Please enter valid future dates.");
+    return;
+  }
+
+  if(!Number.isInteger(guests)||guests<1||guests>room.capacity){
+    alert("Invalid number of guests.");
+    return;
+  }
+
+  if(availableFor(roomId,checkin,checkout,old?old.id:null)<1){
+    alert("No rooms are available for those dates.");
+    return;
+  }
+
+  const total=nightsBetween(checkin,checkout)*room.price;
+
+  if(!confirm(
+    `Room: ${room.name}\nDestination: ${place}\n`+
+    `Dates: ${checkin} to ${checkout}\nGuests: ${guests}\n`+
+    `Total: ${money(total)}\n\nConfirm demo booking?`
+  )) return;
+
+  if(old){
+    Object.assign(old,{checkin,checkout,guests,destination:place,total});
+    alert("Booking updated successfully.");
+  }else{
+    db.bookings.push({
+      id:"SE"+Date.now(),
+      userId:currentUser.id,
+      roomId,
+      roomName:room.name,
+      guestName:currentUser.name,
+      guestEmail:currentUser.email,
+      destination:place,
+      checkin,checkout,guests,total,
+      status:"Confirmed",
+      createdAt:Date.now()
+    });
+    alert("Booking confirmed! This is a simulated booking; no real payment was taken.");
+  }
+
+  save();
+  renderAll();
+  document.getElementById("bookings").scrollIntoView();
+}
+
+document.getElementById("registerForm").addEventListener("submit",event=>{
+  event.preventDefault();
+
+  const name=document.getElementById("regName").value.trim();
+  const email=document.getElementById("regEmail").value.trim().toLowerCase();
+  const phone=document.getElementById("regPhone").value.trim();
+  const password=document.getElementById("regPassword").value;
+
+  if(db.users.some(user=>user.email===email)){
+    document.getElementById("authMessage").textContent="Email already registered.";
+    return;
+  }
+
+  const user={id:Date.now(),name,email,phone,password};
+  db.users.push(user);
+  currentUser=user;
+  save();
+  event.target.reset();
+  document.getElementById("authMessage").textContent="Registration successful!";
+  renderAll();
+});
+
+document.getElementById("loginForm").addEventListener("submit",event=>{
+  event.preventDefault();
+
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password=document.getElementById("loginPassword").value;
+
+  const user=db.users.find(u=>u.email===email&&u.password===password);
+
+  if(!user){
+    document.getElementById("authMessage").textContent="Invalid email or password.";
+    return;
+  }
+
+  currentUser=user;
+  adminOn=false;
+  document.getElementById("authMessage").textContent="Login successful!";
+  renderAll();
+});
+
+document.getElementById("profileForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(!currentUser) return;
+
+  currentUser.name=document.getElementById("profileName").value.trim();
+  currentUser.phone=document.getElementById("profilePhone").value.trim();
+
+  const user=db.users.find(u=>u.id===currentUser.id);
+  if(user){
+    user.name=currentUser.name;
+    user.phone=currentUser.phone;
+  }
+
+  db.bookings.filter(b=>b.userId===currentUser.id)
+    .forEach(b=>b.guestName=currentUser.name);
+
+  save();
+  renderAll();
+  alert("Profile updated.");
+});
+
+document.getElementById("logoutBtn").addEventListener("click",()=>{
+  currentUser=null;
+  renderAll();
+});
+
+function renderProfile(){
+  const info=document.getElementById("profileInfo");
+  const form=document.getElementById("profileForm");
+
+  if(!currentUser){
+    info.textContent="Please log in to view your profile.";
+    form.classList.add("hidden");
+    return;
+  }
+
+  info.textContent="Signed in as "+currentUser.email;
+  document.getElementById("profileName").value=currentUser.name;
+  document.getElementById("profilePhone").value=currentUser.phone;
+  form.classList.remove("hidden");
+}
+
+function renderBookings(){
+  const list=document.getElementById("bookingList");
+
+  if(!currentUser){
+    list.innerHTML='<div class="panel">Log in to view your bookings.</div>';
+    return;
+  }
+
+  const bookings=db.bookings.filter(b=>b.userId===currentUser.id);
+
+  if(!bookings.length){
+    list.innerHTML='<div class="panel">No bookings yet.</div>';
+    return;
+  }
+
+  list.innerHTML=bookings.map(b=>`
+    <article class="booking">
+      <h3>${escapeHTML(b.roomName)} — ${escapeHTML(b.status)}</h3>
+      <p>Booking ID: ${escapeHTML(b.id)}</p>
+      <p>Destination: ${escapeHTML(b.destination)}</p>
+      <p>Dates: ${b.checkin} to ${b.checkout}</p>
+      <p>Guests: ${b.guests}</p>
+      <p>Total: <strong>${money(b.total)}</strong></p>
+      ${b.status==="Confirmed"&&canChange(b)?`
+        <button data-edit="${b.id}">Modify</button>
+        <button class="danger" data-cancel="${b.id}">Cancel</button>
+      `:""}
+      ${b.status==="Confirmed"&&!canChange(b)?
+        "<p><small>Changes and cancellation require at least 3 days before check-in.</small></p>":""}
+    </article>
+  `).join("");
+}
+
+document.getElementById("bookingList").addEventListener("click",event=>{
+  const edit=event.target.closest("[data-edit]");
+  const cancel=event.target.closest("[data-cancel]");
+
+  if(edit){
+    const booking=db.bookings.find(b=>b.id===edit.dataset.edit);
+    if(booking) bookRoom(booking.roomId,booking.id);
+  }
+
+  if(cancel){
+    const booking=db.bookings.find(b=>b.id===cancel.dataset.cancel);
+    if(!booking||!canChange(booking)){
+      alert("Cancellation requires at least 3 days before check-in.");
+      return;
+    }
+
+    if(confirm("Are you sure you want to cancel this booking?")){
+      booking.status="Cancelled";
+      save();
+      renderAll();
+    }
+  }
+});
+
+document.getElementById("reviewForm").addEventListener("submit",event=>{
+  event.preventDefault();
+
+  if(!currentUser){
+    alert("Please log in before submitting a review.");
+    return;
+  }
+
+  db.reviews.push({
+    id:Date.now(),
+    name:currentUser.name,
+    rating:Number(document.getElementById("rating").value),
+    text:document.getElementById("reviewText").value.trim()
+  });
+
+  save();
+  event.target.reset();
+  renderReviews();
+  alert("Thank you for your review!");
+});
+
+function renderReviews(){
+  const list=document.getElementById("reviewList");
+
+  if(!db.reviews.length){
+    list.innerHTML="<p>No reviews yet.</p>";
+    return;
+  }
+
+  list.innerHTML=db.reviews.slice().reverse().map(review=>`
+    <div class="notice">
+      <strong>${escapeHTML(review.name)}</strong>
+      <p>${"★".repeat(review.rating)}${"☆".repeat(5-review.rating)}</p>
+      <p>${escapeHTML(review.text)}</p>
+    </div>
+  `).join("");
+}
+
+document.getElementById("contactForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  document.getElementById("contactMessage").textContent=
+    "Thank you! This demo does not send messages to a server.";
+  event.target.reset();
+});
+
+document.getElementById("adminLoginForm").addEventListener("submit",event=>{
+  event.preventDefault();
+
+  const email=document.getElementById("adminEmail").value.trim().toLowerCase();
+  const password=document.getElementById("adminPassword").value;
+
+  if(email==="admin@stayease.local"&&password==="admin123"){
+    adminOn=true;
+    document.getElementById("adminMessage").textContent="Admin login successful.";
+    renderAll();
+  }else{
+    document.getElementById("adminMessage").textContent="Invalid admin credentials.";
+  }
+});
+
+document.getElementById("adminLogout").addEventListener("click",()=>{
+  adminOn=false;
+  renderAll();
+});
+
+function renderAdmin(){
+  document.getElementById("adminTools").classList.toggle("hidden",!adminOn);
+  document.getElementById("adminLogout").classList.toggle("hidden",!adminOn);
+  if(!adminOn) return;
+
+  document.getElementById("adminRoomList").innerHTML=db.rooms.map(room=>`
+    <tr>
+      <td>${escapeHTML(room.name)}</td>
+      <td><input type="number" min="1" id="price-${room.id}" value="${room.price}"></td>
+      <td><input type="number" min="0" id="qty-${room.id}" value="${room.quantity}"></td>
+      <td><button data-save-room="${room.id}">Save</button></td>
+    </tr>
+  `).join("");
+
+  document.getElementById("adminBookingList").innerHTML=db.bookings.length?
+    db.bookings.map(b=>`
+      <div class="booking">
+        <strong>${escapeHTML(b.id)} — ${escapeHTML(b.guestName)}</strong>
+        <p>${escapeHTML(b.roomName)} | ${b.checkin} to ${b.checkout}</p>
+        <p>${escapeHTML(b.status)} | ${money(b.total)}</p>
+        ${b.status==="Confirmed"?`<button class="danger" data-admin-cancel="${b.id}">Cancel booking</button>`:""}
+      </div>
+    `).join(""):"<p>No reservations yet.</p>";
+}
+
+document.getElementById("adminRoomList").addEventListener("click",event=>{
+  const button=event.target.closest("[data-save-room]");
+  if(!button||!adminOn) return;
+
+  const room=roomById(button.dataset.saveRoom);
+  const price=Number(document.getElementById("price-"+room.id).value);
+  const quantity=Number(document.getElementById("qty-"+room.id).value);
+
+  if(!Number.isFinite(price)||price<1||!Number.isInteger(quantity)||quantity<0){
+    alert("Enter a valid price and quantity.");
+    return;
+  }
+
+  const confirmed=db.bookings.filter(b=>
+    b.roomId===room.id&&b.status==="Confirmed"
+  ).length;
+
+  if(quantity<confirmed){
+    alert("Quantity cannot be lower than the number of confirmed bookings.");
+    return;
+  }
+
+  room.price=price;
+  room.quantity=quantity;
+  save();
+  renderAll();
+  alert("Room details updated.");
+});
+
+document.getElementById("adminBookingList").addEventListener("click",event=>{
+  if(!adminOn) return;
+
+  const button=event.target.closest("[data-admin-cancel]");
+  if(!button) return;
+
+  const booking=db.bookings.find(b=>b.id===button.dataset.adminCancel);
+  if(booking&&confirm("Cancel this booking as administrator?")){
+    booking.status="Cancelled";
+    save();
+    renderAll();
+  }
+});
+
+function renderAll(){
+  renderRooms();
+  renderProfile();
+  renderBookings();
+  renderReviews();
+  renderAdmin();
+}
+
+initializeDates();
+renderAll();
+</script>
+</body>
+</html>
